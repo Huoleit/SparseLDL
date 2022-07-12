@@ -149,6 +149,7 @@ void solve(const std::vector<matrix_t>& Lx, const std::vector<matrix_t>& DInv, v
   int curRow = 0;
   for (int i = 0; i < DInv.size(); ++i) {
     b.segment(curRow, DInv[i].rows()).noalias() = DInv[i] * tmp.segment(curRow, DInv[i].rows());
+    curRow += DInv[i].rows();
   }
   Ltsolve(Lx, b);
 }
