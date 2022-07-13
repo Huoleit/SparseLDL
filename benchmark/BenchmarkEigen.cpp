@@ -6,8 +6,8 @@ using namespace Eigen;
 
 static void BM_FixedSizeLDLTFloat(benchmark::State& state) {
   srand(0);
-  Matrix<float, 4, 4> fixedMatrix;
-  Matrix<float, 4, 1> fixedVector;
+  Matrix<float, 16, 16> fixedMatrix;
+  Matrix<float, 16, 1> fixedVector;
   fixedMatrix.setRandom();
   fixedVector.setRandom();
   fixedMatrix = fixedMatrix * fixedMatrix.transpose();
@@ -19,8 +19,8 @@ static void BM_FixedSizeLDLTFloat(benchmark::State& state) {
 
 static void BM_DynamicSizeLDLTFloat(benchmark::State& state) {
   srand(0);
-  MatrixXf dynamicSizeMatrix(4, 4);
-  VectorXf dynamicSizeVector(4);
+  MatrixXf dynamicSizeMatrix(16, 16);
+  VectorXf dynamicSizeVector(16);
   dynamicSizeMatrix.setRandom();
   dynamicSizeVector.setRandom();
   dynamicSizeMatrix = dynamicSizeMatrix * dynamicSizeMatrix.transpose();
@@ -32,7 +32,7 @@ static void BM_DynamicSizeLDLTFloat(benchmark::State& state) {
 
 static void BM_FixedSizeMulFloat(benchmark::State& state) {
   srand(0);
-  Matrix<double, 2, 2> A, B;
+  Matrix<double, 16, 16> A, B;
   A.setRandom();
   B.setRandom();
   benchmark::DoNotOptimize(A.data());
@@ -46,7 +46,7 @@ static void BM_FixedSizeMulFloat(benchmark::State& state) {
 
 static void BM_DynamicSizeMulFloat(benchmark::State& state) {
   srand(0);
-  MatrixXf A(2, 2), B(2, 2);
+  MatrixXf A(16, 16), B(16, 16);
   A.setRandom();
   B.setRandom();
   benchmark::DoNotOptimize(A.data());
@@ -59,7 +59,7 @@ static void BM_DynamicSizeMulFloat(benchmark::State& state) {
 }
 static void BM_DynamicSizeMulDouble(benchmark::State& state) {
   srand(0);
-  MatrixXd A(2, 2), B(2, 2);
+  MatrixXd A(16, 16), B(16, 16);
   A.setRandom();
   B.setRandom();
   benchmark::DoNotOptimize(A.data());
@@ -71,8 +71,8 @@ static void BM_DynamicSizeMulDouble(benchmark::State& state) {
   }
 }
 
-// BENCHMARK(BM_FixedSizeLDLTFloat);
-// BENCHMARK(BM_DynamicSizeLDLTFloat);
-// BENCHMARK(BM_FixedSizeMulFloat);
+BENCHMARK(BM_FixedSizeLDLTFloat);
+BENCHMARK(BM_DynamicSizeLDLTFloat);
+BENCHMARK(BM_FixedSizeMulFloat);
 BENCHMARK(BM_DynamicSizeMulFloat);
 BENCHMARK(BM_DynamicSizeMulDouble);

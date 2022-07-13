@@ -8,13 +8,13 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 include_directories(include)
 
-add_library(SparseLDL
+add_library(${PROJECT_NAME}
   src/Types.cpp
-  src/SparseLDL.cpp
 )
-target_link_libraries(SparseLDL
+target_link_libraries(${PROJECT_NAME}
   Eigen3::Eigen
 )
+target_compile_options(${PROJECT_NAME} PUBLIC -Wfatal-errors -march=native -msse2 -mavx2 -mavx)
 
 # ###############
 # ## Benchmark ##
@@ -25,16 +25,4 @@ add_subdirectory(benchmark)
 # ## Test ##
 # ##########
 enable_testing()
-include(GoogleTest)
-find_package(GTest REQUIRED)
-
-add_executable(${PROJECT_NAME}-test
-  test/TestLDL.cpp
-  test/GenerateRandomProblem.h
-)
-target_link_libraries(${PROJECT_NAME}-test
-  SparseLDL
-  Eigen3::Eigen
-  GTest::Main
-)
-gtest_discover_tests(${PROJECT_NAME}-test)
+add_subdirectory(test)
