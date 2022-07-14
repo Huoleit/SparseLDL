@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <Eigen/LU>
+#include <Eigen/Cholesky>
 
 #include "SparseLDL/Types.h"
 
@@ -24,7 +24,7 @@ void sparseLDL(const std::vector<tpl::DynamicsLinearApproximation<Scalar>>& dyna
   DInv.reserve(nnzL);
 
   auto checkAndInverse = [](const std::vector<matrix_s_t<Scalar>>& D, std::vector<matrix_s_t<Scalar>>& DInv) {
-    DInv.push_back(D.back().inverse());
+    DInv.push_back(D.back().ldlt().solve(matrix_s_t<Scalar>::Identity(D.back().rows(), D.back().rows())));
   };
 
   for (int k = 0; k < N; ++k) {

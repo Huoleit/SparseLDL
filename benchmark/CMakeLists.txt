@@ -15,8 +15,8 @@ target_link_libraries(BenchmarkEigen
   Eigen3::Eigen
   benchmark::benchmark_main
 )
-target_compile_options(BenchmarkEigen PRIVATE -Wfatal-errors -march=native -msse2 -mavx2 -mavx)
 
+# #####
 add_executable(BenchmarkSparseLDL
   BenchmarkSparseLDL.cpp
 )

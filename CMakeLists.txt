@@ -19,7 +19,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   Eigen3::Eigen
 )
-target_compile_options(${PROJECT_NAME} PUBLIC -Wfatal-errors -march=native -msse2 -mavx2 -mavx)
+target_compile_options(${PROJECT_NAME} PUBLIC -Wfatal-errors)
 
 # ###############
 # ## Benchmark ##

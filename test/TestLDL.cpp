@@ -19,9 +19,9 @@ Eigen::VectorXi indexFromLength(int from, int length) {
 }
 class TestLDL : public ::testing::Test {
  public:
-  constexpr static const size_t N = 3;  // numStages
-  constexpr static const size_t nx = 4;
-  constexpr static const size_t nu = 2;
+  constexpr static const size_t N = 5;  // numStages
+  constexpr static const size_t nx = 8;
+  constexpr static const size_t nu = 8;
   constexpr static const size_t numDecisionVariables = N * (nx + nu);
   constexpr static const size_t numConstraints = N * nx;
 
@@ -35,10 +35,10 @@ class TestLDL : public ::testing::Test {
     }
 
     for (int i = 0; i < N; i++) {
-      dynamics.push_back(getFixedDynamics<double>());
-      cost.push_back(getFixedCost<double>());
+      dynamics.push_back(getRandomDynamics<double>(nx, nu));
+      cost.push_back(getRandomCost<double>(nx, nu));
     }
-    cost.push_back(getFixedCost<double>());
+    cost.push_back(getRandomCost<double>(nx, nu));
   }
 
   Eigen::PermutationMatrix<numDecisionVariables + numConstraints, numDecisionVariables + numConstraints> perm;
@@ -64,5 +64,5 @@ TEST_F(TestLDL, Decomposition) {
   // Solve in-place
   solve(Lx, DInv, b);
 
-  EXPECT_TRUE(reference.isApprox(b, 1e-8)) << "|ref - b|_inf = " << (reference - b).lpNorm<Eigen::Infinity>();
+  EXPECT_TRUE(reference.isApprox(b, 1e-6)) << "|ref - b|_inf = " << (reference - b).lpNorm<Eigen::Infinity>();
 }

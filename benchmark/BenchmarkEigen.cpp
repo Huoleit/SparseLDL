@@ -4,75 +4,56 @@
 
 using namespace Eigen;
 
-static void BM_FixedSizeLDLTFloat(benchmark::State& state) {
+template <typename SCALAR>
+void BM_MatrixMulDynamicsSize(benchmark::State& state) {
   srand(0);
-  Matrix<float, 16, 16> fixedMatrix;
-  Matrix<float, 16, 1> fixedVector;
-  fixedMatrix.setRandom();
-  fixedVector.setRandom();
-  fixedMatrix = fixedMatrix * fixedMatrix.transpose();
-
-  for (auto _ : state) {
-    benchmark::DoNotOptimize(fixedMatrix.ldlt().solve(fixedVector));
-  }
-}
-
-static void BM_DynamicSizeLDLTFloat(benchmark::State& state) {
-  srand(0);
-  MatrixXf dynamicSizeMatrix(16, 16);
-  VectorXf dynamicSizeVector(16);
-  dynamicSizeMatrix.setRandom();
-  dynamicSizeVector.setRandom();
-  dynamicSizeMatrix = dynamicSizeMatrix * dynamicSizeMatrix.transpose();
-
-  for (auto _ : state) {
-    benchmark::DoNotOptimize(dynamicSizeMatrix.ldlt().solve(dynamicSizeVector));
-  }
-}
-
-static void BM_FixedSizeMulFloat(benchmark::State& state) {
-  srand(0);
-  Matrix<double, 16, 16> A, B;
+  Matrix<SCALAR, Dynamic, Dynamic> A(state.range(0), state.range(0)), B(state.range(0), state.range(0));
   A.setRandom();
   B.setRandom();
-  benchmark::DoNotOptimize(A.data());
-  benchmark::DoNotOptimize(B.data());
 
   for (auto _ : state) {
     benchmark::DoNotOptimize((A * B).eval());
-    benchmark::ClobberMemory();
   }
 }
 
-static void BM_DynamicSizeMulFloat(benchmark::State& state) {
+template <typename SCALAR, int SIZE>
+void BM_MatrixMulFixedSize(benchmark::State& state) {
   srand(0);
-  MatrixXf A(16, 16), B(16, 16);
+  Matrix<SCALAR, SIZE, SIZE> A, B;
   A.setRandom();
   B.setRandom();
-  benchmark::DoNotOptimize(A.data());
-  benchmark::DoNotOptimize(B.data());
 
   for (auto _ : state) {
     benchmark::DoNotOptimize((A * B).eval());
-    benchmark::ClobberMemory();
   }
 }
-static void BM_DynamicSizeMulDouble(benchmark::State& state) {
+
+template <typename SCALAR, int SIZE>
+void BM_MatrixInverse(benchmark::State& state) {
   srand(0);
-  MatrixXd A(16, 16), B(16, 16);
+  Matrix<SCALAR, SIZE, SIZE> A, B;
   A.setRandom();
   B.setRandom();
-  benchmark::DoNotOptimize(A.data());
-  benchmark::DoNotOptimize(B.data());
 
   for (auto _ : state) {
     benchmark::DoNotOptimize((A * B).eval());
-    benchmark::ClobberMemory();
   }
 }
 
-BENCHMARK(BM_FixedSizeLDLTFloat);
-BENCHMARK(BM_DynamicSizeLDLTFloat);
-BENCHMARK(BM_FixedSizeMulFloat);
-BENCHMARK(BM_DynamicSizeMulFloat);
-BENCHMARK(BM_DynamicSizeMulDouble);
+// BENCHMARK_TEMPLATE(BM_MatrixMulDynamicsSize, float)->RangeMultiplier(2)->Range(2, 2 << 10);
+// BENCHMARK_TEMPLATE(BM_MatrixMulDynamicsSize, double)->RangeMultiplier(2)->Range(2, 2 << 10);
+
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, float, 2);
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, double, 2);
+
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, float, 4);
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, double, 4);
+
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, float, 6);
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, double, 6);
+
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, float, 8);
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, double, 8);
+
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, float, 10);
+BENCHMARK_TEMPLATE2(BM_MatrixMulFixedSize, double, 10);
