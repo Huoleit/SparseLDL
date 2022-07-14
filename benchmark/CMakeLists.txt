@@ -1,5 +1,3 @@
-include(FetchContent)
-
 set(BENCHMARK_ENABLE_TESTING OFF)
 FetchContent_Declare(
   googlebenchmark

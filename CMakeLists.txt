@@ -4,10 +4,15 @@ project(SparseLDL VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include(FetchContent)
+
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 include_directories(include)
 
+# ###########
+# ## Build ##
+# ###########
 add_library(${PROJECT_NAME}
   src/Types.cpp
 )
