@@ -68,7 +68,9 @@
     "unordered_set": "cpp",
     "dense": "cpp",
     "any": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "sparsecore": "cpp",
+    "sparse": "cpp"
   },
   "cSpell.words": [
     "Lsolve",
