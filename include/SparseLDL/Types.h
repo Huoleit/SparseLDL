@@ -1,6 +1,9 @@
 #pragma once
 
+#include <type_traits>
+
 #include <Eigen/Core>
+#include <Eigen/StdVector>
 
 namespace pdal {
 
@@ -14,48 +17,71 @@ template <typename Scalar>
 using vector_s_t = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
 namespace tpl {
-template <typename Scalar>
+template <typename Scalar, int Nx = -1, int Nu = -1>
 struct DynamicsLinearApproximation {
-  matrix_s_t<Scalar> A;
-  matrix_s_t<Scalar> B;
+  static_assert((Nx != -1 && Nu != -1) || (Nx == -1 && Nu == -1), "Nx and Nu must be either -1 or both non-negative");
+  Eigen::Matrix<Scalar, Nx, Nx> A;
+  Eigen::Matrix<Scalar, Nx, Nu> B;
 
-  template <typename Other>
-  DynamicsLinearApproximation<Other> cast() {
-    DynamicsLinearApproximation<Other> res;
-    res.A = A.template cast<Other>();
-    res.B = B.template cast<Other>();
+  // Fixed-size version
+  template <int SIZE = Nx, typename std::enable_if<SIZE != -1>::type>
+  DynamicsLinearApproximation& setZero() {
+    A.setZero();
+    B.setZero();
+    return *this;
+  }
 
-    return res;
-  };
-  DynamicsLinearApproximation& resize(size_t nx, size_t nu);
-  DynamicsLinearApproximation& setZero(size_t nx, size_t nu);
-  static DynamicsLinearApproximation Zero(size_t nx, size_t nu);
+  // Dynamic-size version
+  template <int SIZE = Nx, typename std::enable_if<SIZE == -1>::type>
+  DynamicsLinearApproximation& setZero(size_t nx, size_t nu) {
+    A.setZero(nx, nx);
+    B.setZero(nx, nu);
+    return *this;
+  }
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
-template <typename Scalar>
+template <typename Scalar, int Nx = -1, int Nu = -1>
 struct CostApproximation {
-  // Assume diagonal cost
-  matrix_s_t<Scalar> Q;
-  matrix_s_t<Scalar> R;
+  static_assert((Nx != -1 && Nu != -1) || (Nx == -1 && Nu == -1), "Nx and Nu must be either -1 or both non-negative");
 
-  template <typename Other>
-  CostApproximation<Other> cast() {
-    CostApproximation<Other> res;
-    res.Q = Q.template cast<Other>();
-    res.R = R.template cast<Other>();
+  Eigen::Matrix<Scalar, Nx, Nx> Q;
+  Eigen::Matrix<Scalar, Nu, Nu> R;
 
-    return res;
-  };
-  CostApproximation& resize(size_t nx, size_t nu);
-  CostApproximation& setZero(size_t nx, size_t nu);
-  static CostApproximation Zero(size_t nx, size_t nu);
+  // Fixed-size version
+  template <int SIZE = Nx, typename std::enable_if<SIZE != -1>::type>
+  CostApproximation& setZero() {
+    Q.setZero();
+    R.setZero();
+    return *this;
+  }
+
+  // Dynamic-size version
+  template <int SIZE = Nx, typename std::enable_if<SIZE == -1>::type>
+  CostApproximation& setZero(size_t nx, size_t nu) {
+    Q.setZero(nx, nx);
+    R.setZero(nu, nu);
+    return *this;
+  }
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 }  // namespace tpl
 
-using DynamicsLinearApproximationFloat = tpl::DynamicsLinearApproximation<float>;
-using DynamicsLinearApproximationDouble = tpl::DynamicsLinearApproximation<double>;
+template <int Nx, int Nu>
+using DynamicsApproximationFloat = tpl::DynamicsLinearApproximation<float>;
+using DynamicsApproximationDouble = tpl::DynamicsLinearApproximation<double>;
 using CostApproximationFloat = tpl::CostApproximation<float>;
 using CostApproximationDouble = tpl::CostApproximation<double>;
+
+template <typename Scalar, int Nx, int Nu>
+using DynamicsAlignedStdVector = std::vector<tpl::DynamicsLinearApproximation<Scalar, Nx, Nu>,
+                                             Eigen::aligned_allocator<tpl::DynamicsLinearApproximation<Scalar, Nx, Nu>>>;
+
+template <typename Scalar, int Nx, int Nu>
+using CostAlignedStdVector =
+    std::vector<tpl::CostApproximation<Scalar, Nx, Nu>, Eigen::aligned_allocator<tpl::CostApproximation<Scalar, Nx, Nu>>>;
 
 }  // namespace pdal
 

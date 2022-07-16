@@ -8,18 +8,17 @@ include(FetchContent)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-include_directories(include)
-
 # ###########
 # ## Build ##
 # ###########
+include_directories(include)
 add_library(${PROJECT_NAME}
   src/Types.cpp
 )
 target_link_libraries(${PROJECT_NAME}
   Eigen3::Eigen
 )
-target_compile_options(${PROJECT_NAME} PUBLIC -Wfatal-errors)
+target_compile_options(${PROJECT_NAME} PUBLIC -Wfatal-errors -msse3 -msse4.1 -msse4.2)
 
 # ###############
 # ## Benchmark ##

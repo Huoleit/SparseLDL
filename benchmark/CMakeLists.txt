@@ -24,3 +24,14 @@ target_link_libraries(BenchmarkSparseLDL
   ${PROJECT_NAME}
   benchmark::benchmark_main
 )
+
+# #####
+add_executable(SimpleEigenBenchmark
+  SimpleEigenBenchmark.cpp
+)
+target_link_libraries(SimpleEigenBenchmark
+  Eigen3::Eigen
+)
+target_compile_options(SimpleEigenBenchmark PRIVATE
+  -save-temps
+)

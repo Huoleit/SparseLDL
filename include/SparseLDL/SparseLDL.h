@@ -1,16 +1,15 @@
 #pragma once
 
-#include <vector>
-
-#include <Eigen/Cholesky>
-
 #include "SparseLDL/Types.h"
 
+#include <Eigen/Cholesky>
+#include <Eigen/LU>
+
 namespace pdal {
-template <typename Scalar>
-void sparseLDL(const std::vector<tpl::DynamicsLinearApproximation<Scalar>>& dynamics,
-               const std::vector<tpl::CostApproximation<Scalar>>& cost, std::vector<matrix_s_t<Scalar>>& Lx,
-               std::vector<matrix_s_t<Scalar>>& DInv, std::vector<matrix_s_t<Scalar>>& D, Scalar eps = 1e-5) {
+template <typename Scalar, int Nx, int Nu>
+void sparseLDL(const DynamicsAlignedStdVector<Scalar, Nx, Nu>& dynamics, const CostAlignedStdVector<Scalar, Nx, Nu>& cost,
+               std::vector<matrix_s_t<Scalar>>& Lx, std::vector<matrix_s_t<Scalar>>& DInv, std::vector<matrix_s_t<Scalar>>& D,
+               Scalar eps = 1e-5) {
   const int N = dynamics.size();  // number of stages
 
   int nnzL = N * 3;  // u, lambda, x

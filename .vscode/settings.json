@@ -62,7 +62,13 @@
     "cholesky": "cpp",
     "codecvt": "cpp",
     "regex": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "stdvector": "cpp",
+    "forward_list": "cpp",
+    "unordered_set": "cpp",
+    "dense": "cpp",
+    "any": "cpp",
+    "variant": "cpp"
   },
   "cSpell.words": [
     "Lsolve",

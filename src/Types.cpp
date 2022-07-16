@@ -1,5 +1,4 @@
 #include "SparseLDL/Types.h"
-#include "SparseLDL/implementation/Types.h"
 
 namespace pdal {
 // explicit instantiation
