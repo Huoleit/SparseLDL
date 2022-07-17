@@ -1,0 +1,46 @@
+{% macro genertateFixed_D_Matrix(stage) %}
+  Eigen::Matrix<Scalar, Nu, Nu> D{{stage*3}};
+  Eigen::Matrix<Scalar, Nx, Nx> D{{stage*3 + 1}};
+  Eigen::Matrix<Scalar, Nx, Nx> D{{stage*3 + 2}};
+{% endmacro -%}
+
+{% macro genertateFixed_L_Matrix(stage) %}
+  Eigen::Matrix<Scalar, Nx, Nx> L{{(stage*3 + 1)*10 + (stage*3 - 1)}}; // A
+  Eigen::Matrix<Scalar, Nx, Nu> L{{(stage*3 + 1)*10 + (stage*3)}}; // B
+  Eigen::Matrix<Scalar, Nx, Nx> L{{(stage*3 + 2)*10 + (stage*3 + 1)}}; // -I
+{% endmacro -%} 
+
+{% macro genertateFactorizationStep(stage) %}
+  D.D{{stage*3}} = cost[{{stage}}].R;
+  DInv.D{{stage*3}} = D.D{{stage*3}}.inverse();
+  Lx.L{{(stage*3 + 1)*10 + (stage*3 - 1)}}.noalias() = dynamics[{{stage}}].A * DInv.D{{stage*3-1}};
+  Lx.L{{(stage*3 + 1)*10 + (stage*3)}}.noalias() = dynamics[{{stage}}].B * DInv.D{{stage*3}};
+
+  D.D{{stage*3 + 1}}.noalias() = -dynamics[{{stage}}].A * Lx.L{{(stage*3 + 1)*10 + (stage*3 - 1)}}.transpose();
+  D.D{{stage*3 + 1}}.noalias() -= dynamics[{{stage}}].B * Lx.L{{(stage*3 + 1)*10 + (stage*3)}}.transpose();
+  D.D{{stage*3 + 1}} -= eps * Eigen::Matrix<Scalar, Nx, Nx>::Identity();
+  DInv.D{{stage*3 + 1}} = D.D{{stage*3 + 1}}.inverse();
+
+  Lx.L{{(stage*3 + 2)*10 + (stage*3 + 1)}} = -DInv.D{{stage*3 + 1}};
+  D.D{{stage*3 + 2}} = cost[{{stage+1}}].Q;
+  D.D{{stage*3 + 2}} -= DInv.D{{stage*3 + 1}};
+  DInv.D{{stage*3 + 2}} = D.D{{stage*3 + 2}}.inverse();
+{% endmacro %}
+
+{% macro genertateForwardSubstitution(stage) %}
+  b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu).noalias() -= Lx.L{{(stage*3 + 1)*10 + (stage*3 - 1)}} * b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} - Nx);
+  b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu).noalias() -= Lx.L{{(stage*3 + 1)*10 + (stage*3)}} * b.template segment<Nu>((Nu + Nx + Nx)*{{stage}});
+  b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu + Nx).noalias() -= Lx.L{{(stage*3 + 2)*10 + (stage*3 + 1)}} * b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu);
+{% endmacro %}
+
+{% macro genertate_D_solve(stage) %}
+  b.template segment<Nu>((Nu + Nx + Nx)*{{stage}}).transpose() *= DInv.D{{stage*3}};
+  b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu).transpose() *= DInv.D{{stage*3 + 1}};
+  b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu + Nx).transpose() *= DInv.D{{stage*3 + 2}};
+{% endmacro %}
+
+{% macro genertateBackwardSubstitution(stage) %}
+  b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu).noalias() -= Lx.L{{(stage*3 + 2)*10 + (stage*3 + 1)}}.transpose() * b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu + Nx);
+  b.template segment<Nu>((Nu + Nx + Nx)*{{stage}}).noalias() -= Lx.L{{(stage*3 + 1)*10 + (stage*3)}}.transpose() * b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu);
+  b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} - Nx).noalias() -= Lx.L{{(stage*3 + 1)*10 + (stage*3 - 1)}}.transpose() * b.template segment<Nx>((Nu + Nx + Nx)*{{stage}} + Nu);
+{% endmacro %}

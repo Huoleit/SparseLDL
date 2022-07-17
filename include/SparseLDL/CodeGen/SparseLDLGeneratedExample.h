@@ -4,6 +4,8 @@
 
 #include <Eigen/LU>
 
+#include "Benchmark.h"
+
 namespace pdal {
 template <typename Scalar, int Nx, int Nu>
 struct DxCollection {
@@ -26,12 +28,20 @@ struct LxCollection {
   Eigen::Matrix<Scalar, Nx, Nx> L42;
   Eigen::Matrix<Scalar, Nx, Nu> L43;
   Eigen::Matrix<Scalar, Nx, Nx> L54;
+
+  struct traits {
+    static constexpr int numStates = Nx;
+    static constexpr int numControls = Nu;
+    static constexpr int numStages = 2;
+  };
 };
 
 template <typename Scalar, int Nx, int Nu>
 void solveWithSparseLDL(const DynamicsAlignedStdVector<Scalar, Nx, Nu>& dynamics, const CostAlignedStdVector<Scalar, Nx, Nu>& cost,
                         LxCollection<Scalar, Nx, Nu>& Lx, DxCollection<Scalar, Nx, Nu>& D, DxCollection<Scalar, Nx, Nu>& DInv,
-                        vector_s_t<Scalar>& b, Scalar eps = 1e-5) {
+
+                        vector_s_t<Scalar>& b, RepeatedTimer* timer = nullptr, Scalar eps = 1e-5) {
+  if (timer) timer->startTimer();
   D.D0 = cost[0].R;
   DInv.D0 = D.D0.inverse();
   Lx.L10.noalias() = dynamics[0].B * DInv.D0;
@@ -59,6 +69,8 @@ void solveWithSparseLDL(const DynamicsAlignedStdVector<Scalar, Nx, Nu>& dynamics
   D.D5 = cost[2].Q;
   D.D5 -= DInv.D4;
   DInv.D5 = D.D5.inverse();
+
+  if (timer) timer->endTimer();
 
   // Solves (L+I)x = b
   b.template segment<Nx>(Nu).noalias() -= Lx.L10 * b.template segment<Nu>(0);

@@ -1,4 +1,4 @@
-#include "SparseLDL/CodeGen/SparseLDLGen.h"
+#include "SparseLDL/CodeGen/SparseLDLGenerated.h"
 #include "SparseLDL/SparseLDL.h"
 
 #include <iostream>
@@ -70,9 +70,9 @@ TEST_F(TestLDL, Decomposition) {
 
 TEST(LDL, CodeGen) {
   srand(10);
-  constexpr static const size_t N = 2;  // numStages
   constexpr static const size_t nx = 4;
   constexpr static const size_t nu = 2;
+  constexpr static const size_t N = LxCollection<double, nx, nu>::traits::numStages;  // numStages
   constexpr static const size_t numDecisionVariables = N * (nx + nu);
   constexpr static const size_t numConstraints = N * nx;
 
@@ -102,6 +102,6 @@ TEST(LDL, CodeGen) {
     sparseLDL(dynamics, cost, Lx, DxInv, Dx);
     solve(Lx, DxInv, b_ref);
   }
-
+  std::cout << "|ref - b|_inf = " << (b_ref - b).lpNorm<Eigen::Infinity>() << std::endl;
   EXPECT_TRUE(b.isApprox(b_ref, 1e-4)) << "|ref - b|_inf = " << (b_ref - b).lpNorm<Eigen::Infinity>();
 }

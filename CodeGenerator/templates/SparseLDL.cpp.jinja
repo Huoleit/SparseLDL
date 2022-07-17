@@ -1,0 +1,81 @@
+{% import 'Macros.jinja' as Macros %}
+#pragma once
+
+#include "SparseLDL/Types.h"
+
+#include <Eigen/LU>
+
+namespace pdal {
+template <typename Scalar, int Nx, int Nu>
+struct DxCollection {
+  {% for m in range(stage) %}
+    {{ Macros.genertateFixed_D_Matrix(m) }}
+  {% endfor %}
+
+  struct traits {
+    static constexpr int numStates = Nx;
+    static constexpr int numControls = Nu;
+    static constexpr int numStages = {{ stage }};
+  };
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+template <typename Scalar, int Nx, int Nu>
+struct LxCollection {
+  Eigen::Matrix<Scalar, Nx, Nu> L10;
+  Eigen::Matrix<Scalar, Nx, Nx> L21;
+  {% for m in range(1, stage) %}
+    {{ Macros.genertateFixed_L_Matrix(m) }}
+  {% endfor %}
+
+  struct traits {
+    static constexpr int numStates = Nx;
+    static constexpr int numControls = Nu;
+    static constexpr int numStages = {{ stage }};
+  };
+  
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+template <typename Scalar, int Nx, int Nu>
+void solveWithSparseLDL(const DynamicsAlignedStdVector<Scalar, Nx, Nu>& dynamics, const CostAlignedStdVector<Scalar, Nx, Nu>& cost,
+                        LxCollection<Scalar, Nx, Nu>& Lx, DxCollection<Scalar, Nx, Nu>& D, DxCollection<Scalar, Nx, Nu>& DInv,
+                        vector_s_t<Scalar>& b, Scalar eps = 1e-5) {
+  D.D0 = cost[0].R;
+  DInv.D0 = D.D0.inverse();
+  Lx.L10.noalias() = dynamics[0].B * DInv.D0;
+
+  D.D1.noalias() = -dynamics[0].B * Lx.L10.transpose();
+  D.D1 -= eps * Eigen::Matrix<Scalar, Nx, Nx>::Identity();
+  DInv.D1 = D.D1.inverse();
+  Lx.L21 = -DInv.D1;
+
+  D.D2 = cost[1].Q;
+  D.D2 -= DInv.D1;
+  DInv.D2 = D.D2.inverse();
+
+  {% for m in range(1, stage) %}
+    {{ Macros.genertateFactorizationStep(m) }}
+  {% endfor %}
+
+  // Solves (L+I)x = b
+  b.template segment<Nx>(Nu).noalias() -= Lx.L10 * b.template segment<Nu>(0);
+  b.template segment<Nx>(Nu + Nx).noalias() -= Lx.L21 * b.template segment<Nx>(Nu);
+  {% for m in range(1, stage) %}
+    {{ Macros.genertateForwardSubstitution(m) }}
+  {% endfor %}
+
+
+  {% for m in range(stage) %}
+    {{ Macros.genertate_D_solve(m) }}
+  {% endfor %}
+
+  // Solves (L+I)'x = b
+  {% for m in range(1, stage)|reverse %}
+    {{ Macros.genertateBackwardSubstitution(m) }}
+  {% endfor %}
+  b.template segment<Nx>(Nu).noalias() -= Lx.L21.transpose() * b.template segment<Nx>(Nu + Nx);
+  b.template segment<Nu>(0).noalias() -= Lx.L10.transpose() * b.template segment<Nx>(Nu);
+};
+}  // namespace pdal
