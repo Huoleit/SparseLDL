@@ -20,6 +20,8 @@ Eigen::VectorXi indexFromLength(int from, int length) {
 }
 class TestLDL : public ::testing::Test {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   constexpr static const int N = 4;  // numStages
   constexpr static const int nx = 8;
   constexpr static const int nu = 4;

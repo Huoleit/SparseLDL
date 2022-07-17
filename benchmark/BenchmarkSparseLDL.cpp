@@ -21,7 +21,9 @@ using namespace std;
 template <typename Scalar>
 class BenchmarkSparseLDL : public benchmark::Fixture {
  public:
-  constexpr static const size_t nx = 8;
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  constexpr static const size_t nx = 12;
   constexpr static const size_t nu = 8;
   constexpr static const size_t N = LxCollection<double, nx, nu>::traits::numStages;  // numStages
   constexpr static const size_t numDecisionVariables = N * (nx + nu);
