@@ -50,7 +50,7 @@ struct CostApproximation {
   Eigen::Matrix<Scalar, Nu, Nu> R;
 
   // Fixed-size version
-  template <int SIZE = Nx, typename std::enable_if<SIZE != -1>::type>
+  template <int SIZE = Nx, typename std::enable_if<SIZE != -1, bool>::type = true>
   CostApproximation& setZero() {
     Q.setZero();
     R.setZero();
@@ -58,7 +58,7 @@ struct CostApproximation {
   }
 
   // Dynamic-size version
-  template <int SIZE = Nx, typename std::enable_if<SIZE == -1>::type>
+  template <int SIZE = Nx, typename std::enable_if<SIZE == -1, bool>::type = true>
   CostApproximation& setZero(size_t nx, size_t nu) {
     Q.setZero(nx, nx);
     R.setZero(nu, nu);
