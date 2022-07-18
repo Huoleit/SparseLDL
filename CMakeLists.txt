@@ -4,7 +4,7 @@ project(SparseLDL VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(ENABLE_BENCHMARKS ON)
+option(ENABLE_BENCHMARKS "Build benchmark" ON)
 
 include(FetchContent)
 
@@ -40,6 +40,7 @@ add_dependencies(${PROJECT_NAME}
 # ##############################################################################
 # ## Benchmark ##
 # ##############################################################################
+message(STATUS "Benchmarking -- " ${ENABLE_BENCHMARKS})
 if(ENABLE_BENCHMARKS)
   add_subdirectory(benchmark)
 endif()

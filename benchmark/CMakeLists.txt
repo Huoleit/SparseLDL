@@ -5,10 +5,11 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googlebenchmark)
 
-set(QDLDL_BUILD_SHARED_LIB OFF)
-set(QDLDL_BUILD_DEMO_EXE OFF)
-set(QDLDL_UNITTESTS OFF)
-set(QDLDL_LONG OFF)
+# QDLDL config
+set(QDLDL_BUILD_SHARED_LIB OFF CACHE INTERNAL "")
+set(QDLDL_BUILD_DEMO_EXE OFF CACHE INTERNAL "")
+set(QDLDL_UNITTESTS OFF CACHE INTERNAL "")
+set(QDLDL_LONG OFF CACHE INTERNAL "")
 FetchContent_Declare(
   qdldl
   URL https://github.com/osqp/qdldl/archive/refs/tags/v0.1.6.tar.gz
