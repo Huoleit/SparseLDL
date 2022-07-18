@@ -19,7 +19,7 @@ def formatAndWriteFile(path: Path, content: str) -> None:
     formatConfig = json.dumps(
         load_yaml(Path(__file__).parent.resolve() / "config/.clang-format")
     )
-    with open(path, "w") as f:
+    with open(path, "w+") as f:
         formatterProcess = Popen(
             ["clang-format", "--assume-filename=file.cpp", f"--style={formatConfig}"],
             stdin=PIPE,
