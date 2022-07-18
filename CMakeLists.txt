@@ -4,6 +4,8 @@ project(SparseLDL VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(ENABLE_BENCHMARKS ON)
+
 include(FetchContent)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
@@ -38,7 +40,9 @@ add_dependencies(${PROJECT_NAME}
 # ##############################################################################
 # ## Benchmark ##
 # ##############################################################################
-add_subdirectory(benchmark)
+if(ENABLE_BENCHMARKS)
+  add_subdirectory(benchmark)
+endif()
 
 # ##############################################################################
 # ## Test ##
